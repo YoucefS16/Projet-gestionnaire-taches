@@ -1,0 +1,17 @@
+{
+  "name": "integration-tests",
+  "version": "1.0.0",
+  "description": "Tests d'intégration du projet gestionnaire de tâches",
+  "main": "test_integration.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.1.0"
+  }
+}
