@@ -150,3 +150,111 @@ un utilisateur peut gérer ses tâches
 
 Cela réduit fortement les risques d’erreurs lors des mises à jour de l’application et améliore la qualité globale du logiciel.
 
+**Validation de la connexion :**
+![Login Pass](./test%20login%20.png)
+
+**Validation du cycle Création/Suppression :**
+![CRUD Pass](./create%20delete%20test.png)
+
+
+**PARTIE ES LINT**
+
+**Problèmes rencontrés**
+
+Lors de la mise en place de l'analyse de code avec ESLint, plusieurs problèmes ont été rencontrés.
+
+Tout d'abord, ESLint signalait que certaines variables comme require, module ou process n'étaient pas définies.
+Cela venait du fait que la configuration par défaut ne prenait pas en compte l'environnement Node.js utilisé dans le backend.
+
+Ensuite, des erreurs de parsing apparaissaient dans les fichiers du frontend.
+Ces erreurs étaient liées à la présence de JSXutilisé par React, qui n'était pas reconnu par la configuration initiale d’ESLint.
+
+Enfin, après correction de la configuration, ESLint signalait plusieurs variables non utilisées (par exemple React, error ou password).
+Ces avertissements ont été corrigés soit en supprimant les variables inutiles, soit en les utilisant dans le code lorsque cela était nécessaire.
+
+Après ajustement de la configuration et correction de certains éléments du code, l’analyse ESLint fonctionne correctement et ne retourne plus d’erreurs bloquantes.
+
+![Configuration ESLint](./eslint.png)
+
+# README — Partie Tests Unitaires Backend (Youcef)
+
+## Présentation
+
+Dans le cadre du projet, je me suis occupé de la partie **tests unitaires backend**.  
+Mon objectif était de vérifier le bon fonctionnement des principales fonctionnalités du serveur, notamment l’authentification et la gestion des tâches.
+
+Pour cela, j’ai utilisé :
+
+- **Jest**
+- **Supertest**
+
+## Tests réalisés
+
+J’ai créé plusieurs fichiers de tests backend afin de vérifier :
+
+- la connexion avec des identifiants valides ;
+- le refus de connexion avec des identifiants invalides ;
+- le refus d’accès aux routes protégées sans token ;
+- la récupération des tâches ;
+- la création d’une tâche ;
+- le refus de création d’une tâche sans titre ;
+- la modification du statut d’une tâche ;
+- la suppression d’une tâche ;
+- les cas où une tâche n’existe pas.
+
+Les fichiers utilisés sont :
+
+- `auth.test.js`
+- `tasks.test.js`
+- `tasks.notfound.test.js`
+
+## Problèmes rencontrés
+
+### 1. `npm test` ne fonctionnait pas au début
+
+Le premier problème que j’ai rencontré est que la commande `npm test` ne trouvait pas les tests automatiquement.
+
+Le problème venait du fait que les fichiers de tests backend étaient placés dans une arborescence précise du projet, et non dans l’emplacement le plus simple à détecter directement par Jest.
+
+### 2. Problème avec le `package-lock.json`
+
+J’ai aussi rencontré un problème lié au `package-lock.json`.  
+Après certaines manipulations avec npm, le projet n’était plus exactement dans le bon état, ce qui bloquait certaines commandes ou créait des différences locales.
+
+### 3. Les premiers tests ne couvraient pas assez de cas
+
+Au début, je testais surtout les cas où tout fonctionnait normalement, comme une connexion valide ou la création correcte d’une tâche.
+
+Je me suis ensuite rendu compte qu’il fallait aussi vérifier les cas d’erreur, par exemple :
+
+- mauvais identifiants ;
+- absence de token ;
+- tâche sans titre ;
+- tâche inexistante.
+
+## Solutions apportées
+
+Pour résoudre ces problèmes :
+
+- j’ai adapté la manière de lancer les tests afin qu’ils soient bien pris en compte ;
+- j’ai remis le bon `package-lock.json` pour retrouver un environnement stable ;
+- j’ai réinstallé les dépendances si nécessaire ;
+- j’ai ajouté plusieurs tests supplémentaires pour couvrir aussi les erreurs possibles.
+
+## Ce que cette partie m’a appris
+
+Cette partie m’a permis de mieux comprendre :
+
+- le fonctionnement de Jest ;
+- l’utilisation de Supertest sur un backend ;
+- l’importance de la configuration des tests ;
+- le rôle du `package-lock.json` dans la stabilité du projet ;
+- l’intérêt de tester aussi les cas d’erreur, et pas seulement les cas où tout marche.
+
+## Bilan
+
+Au final, j’ai réussi à mettre en place une base de **tests unitaires backend** sur les routes principales du projet.
+
+Cette partie m’a permis de contribuer à la qualité du backend en vérifiant automatiquement plusieurs fonctionnalités importantes, tout en résolvant les principaux problèmes liés au lancement des tests et à l’environnement npm.
+
+![Résultat Global des Tests](./Tests_reussis.PNG)

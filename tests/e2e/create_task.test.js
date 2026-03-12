@@ -14,32 +14,51 @@ describe('Création de tâche - Test E2E', function () {
   });
 
   it('doit permettre de créer une nouvelle tâche', async () => {
-    await driver.get('http://localhost:3000');
+    await driver.get('http://localhost:3000/login');
 
     // 1. Connexion
-    await driver.wait(until.elementLocated(By.id('email')), 10000).sendKeys('admin@test.com');
+    await driver.wait(until.elementLocated(By.id('email')), 10000);
+    await driver.findElement(By.id('email')).sendKeys('admin@test.com');
     await driver.findElement(By.id('password')).sendKeys('password');
     await driver.findElement(By.css('button[type="submit"]')).click();
 
-    // 2. MODIFICATION ICI : On n'attend plus l'URL, on attend le bouton directement
-    // On met 15000 (15 secondes) pour que GitHub Actions ait le temps de charger
+    // 2. Attendre qu'on ne soit plus sur /login
+    await driver.wait(async () => {
+      const currentUrl = await driver.getCurrentUrl();
+      return !currentUrl.includes('/login');
+    }, 15000);
+
+    // 3. Attendre le bouton "Nouvelle Tâche" avec sélecteur plus souple
     const newTaskBtn = await driver.wait(
-      until.elementLocated(By.xpath("//button[contains(text(), 'Nouvelle Tâche')]")),
+      until.elementLocated(
+        By.xpath("//button[contains(., 'Nouvelle') and contains(., 'Tâche')]")
+      ),
       15000
     );
+    await driver.wait(until.elementIsVisible(newTaskBtn), 10000);
+    await driver.wait(until.elementIsEnabled(newTaskBtn), 10000);
     await newTaskBtn.click();
 
-    // 3. Remplissage
+    // 4. Remplissage
     const titleInput = await driver.wait(until.elementLocated(By.id('title')), 10000);
+    await titleInput.clear();
     await titleInput.sendKeys('Tâche Selenium 2026');
-    await driver.findElement(By.id('description')).sendKeys('Test automatisé réussi');
 
-    // 4. Validation (Bouton Créer)
-    const submitButton = await driver.findElement(By.xpath("//button[text()='Créer']"));
+    const descriptionInput = await driver.findElement(By.id('description'));
+    await descriptionInput.clear();
+    await descriptionInput.sendKeys('Test automatisé réussi');
+
+    // 5. Validation
+    const submitButton = await driver.findElement(
+      By.xpath("//button[contains(., 'Créer')]")
+    );
     await submitButton.click();
 
-    // 5. Vérification finale
-    await driver.wait(until.elementLocated(By.xpath("//*[contains(text(), 'Tâche Selenium 2026')]")), 15000);
+    // 6. Vérification finale
+    await driver.wait(
+      until.elementLocated(By.xpath("//*[contains(., 'Tâche Selenium 2026')]")),
+      15000
+    );
 
     const pageSource = await driver.getPageSource();
     assert.ok(pageSource.includes('Tâche Selenium 2026'));
