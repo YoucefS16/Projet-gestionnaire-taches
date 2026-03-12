@@ -14,9 +14,8 @@ on:
       - develop
 
 jobs:
-
   backend:
-    name: Backend - lint + tests
+    name: Backend - lint + tests + coverage
     runs-on: ubuntu-latest
 
     defaults:
@@ -34,7 +33,7 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm ci
 
       - name: Lint backend
@@ -44,11 +43,10 @@ jobs:
         run: npm test || echo "Backend tests not ready"
 
       - name: Run backend coverage
-        run: npm run test:coverage || echo "Coverage skipped"
-
+        run: npm run test:coverage || echo "Backend coverage skipped"
 
   frontend:
-    name: Frontend - tests + build
+    name: Frontend - tests + coverage + build
     runs-on: ubuntu-latest
 
     defaults:
@@ -66,21 +64,20 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
       - name: Run frontend tests
         run: npm test -- --run || echo "Frontend tests not ready"
 
       - name: Run frontend coverage
-        run: npm run test:coverage -- --run || echo "Coverage skipped"
+        run: npm run test:coverage -- --run || echo "Frontend coverage skipped"
 
       - name: Build frontend
         run: npm run build
 
-
   e2e:
-    name: E2E Selenium login test
+    name: E2E Selenium
     runs-on: ubuntu-latest
     needs:
       - backend
@@ -90,10 +87,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check if login test exists
+      - name: Check if E2E folder exists
         id: check_e2e
         run: |
-          if [ -f tests/login.test.js ]; then
+          if ls tests/e2e/*.test.js 1> /dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -123,7 +120,7 @@ jobs:
         if: steps.check_e2e.outputs.exists == 'true'
         run: |
           npm init -y
-          npm install selenium-webdriver jest wait-on
+          npm install mocha selenium-webdriver chromedriver wait-on
 
       - name: Start backend
         if: steps.check_e2e.outputs.exists == 'true'
@@ -131,6 +128,8 @@ jobs:
         env:
           PORT: 5000
           JWT_SECRET: ci_secret
+          FRONTEND_URL: http://127.0.0.1:3000
+          NODE_ENV: test
         run: |
           nohup npm start > ../backend.log 2>&1 &
 
@@ -142,13 +141,17 @@ jobs:
         run: |
           nohup npm run start -- --host 0.0.0.0 --port 3000 > ../frontend.log 2>&1 &
 
-      - name: Wait for app
+      - name: Wait for frontend
         if: steps.check_e2e.outputs.exists == 'true'
         run: npx wait-on http://127.0.0.1:3000
 
-      - name: Run login test
+      - name: Wait for backend health
         if: steps.check_e2e.outputs.exists == 'true'
-        run: xvfb-run -a npx jest tests/login.test.js --runInBand
+        run: npx wait-on http://127.0.0.1:5000/health
+
+      - name: Run all E2E tests
+        if: steps.check_e2e.outputs.exists == 'true'
+        run: xvfb-run -a npx mocha "tests/e2e/**/*.test.js" --timeout 30000
 
       - name: Upload logs if failed
         if: failure()
