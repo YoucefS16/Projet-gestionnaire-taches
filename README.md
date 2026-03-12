@@ -150,3 +150,8 @@ un utilisateur peut gérer ses tâches
 
 Cela réduit fortement les risques d’erreurs lors des mises à jour de l’application et améliore la qualité globale du logiciel.
 
+**Validation de la connexion :**
+![Login Pass](./test%20login%20.png)
+
+**Validation du cycle Création/Suppression :**
+![CRUD Pass](./create%20delete%20test.png)
