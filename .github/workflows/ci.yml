@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache node modules (backend)
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: backend-node-${{ runner.os }}-v1
+          restore-keys: |
+            backend-node-${{ runner.os }}-v1
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Run backend lint
+        run: npm run lint
+        working-directory: backend
+        continue-on-error: true
+
+      - name: Run backend tests
+        run: npm test --silent
+        working-directory: backend
+
+  frontend:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache node modules (frontend)
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: frontend-node-${{ runner.os }}-v1
+          restore-keys: |
+            frontend-node-${{ runner.os }}-v1
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run frontend tests
+        run: npm test --silent
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build --silent
+        working-directory: frontend
