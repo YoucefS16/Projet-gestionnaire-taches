@@ -1,1 +1,2 @@
-# Projet-gestionnaire-taches
+# taskmanagement
+Application de gestion de tâches
